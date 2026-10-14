@@ -1,4 +1,8 @@
-# 🎵 MusiConnect
+<div align="center">
+  <img src="logo.svg" alt="MusiConnect Logo" width="120" height="120" />
+  <h1>MusiConnect</h1>
+  <p><b>Spotify to YouTube Music Seamless Playlist Migration</b></p>
+</div>
 
 A modern web application to synchronize and transfer your Spotify playlists to YouTube Music with zero track limits and accurate track matching.
 
