@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# User secrets & session data (CRITICAL: Do not upload to GitHub!)
+data/*
+!data/.gitkeep
+.spotify_cache
+.cache
+*.json
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

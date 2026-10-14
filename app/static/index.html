@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusiConnect - Spotify to YouTube Music</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%22%22><text y=%2226%22 font-size=%2228%22>🎵</text></svg>">
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                </div>
+                <div>MusiConnect</div>
+            </div>
+
+            <nav class="nav-tabs">
+                <button class="nav-btn active" data-tab="transfer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+                    Aktar
+                </button>
+                <button class="nav-btn" data-tab="settings">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Bağlantılar & Ayarlar
+                </button>
+                <button class="nav-btn" data-tab="history">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Geçmiş
+                </button>
+            </nav>
+
+            <div class="status-pill-container">
+                <div class="status-pill">
+                    <span id="spotify-status-indicator" class="status-indicator status-red"></span>
+                    <span id="spotify-status-text">Spotify: Kontrol Ediliyor</span>
+                </div>
+                <div class="status-pill">
+                    <span id="yt-status-indicator" class="status-indicator status-red"></span>
+                    <span id="yt-status-text">YouTube: Kontrol Ediliyor</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+        
+        <!-- Tab 1: Transfer -->
+        <section id="transfer" class="tab-content active">
+            <div class="transfer-hero">
+                <h1>Spotify'dan YouTube'a Limitsiz Aktarım</h1>
+                <p>Çalma listenizde kaç şarkı olursa olsun, doğru eşleştirmeler ve süre doğrulamasıyla YouTube Music'e güvenle kopyalayın.</p>
+            </div>
+
+            <div class="glass-panel" style="padding: 2rem; margin-bottom: 2rem;">
+                <label style="display: block; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">
+                    Spotify Çalma Listesi Linki
+                </label>
+                <div class="input-group">
+                    <input type="text" id="spotify-url-input" class="url-input" placeholder="Örn: https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M" />
+                    <button id="btn-preview" class="btn-primary">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <span>Önizle</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="preview-container" style="display: none;">
+                <div class="glass-panel playlist-card">
+                    <img id="preview-cover" src="" alt="Kapak" class="playlist-cover" />
+                    <div class="playlist-info" style="flex: 1;">
+                        <h3 id="preview-title">-</h3>
+                        <div id="preview-owner" class="playlist-meta">-</div>
+                        <div class="playlist-stats">
+                            <span id="preview-count" class="stat-badge">0 Şarkı</span>
+                            <span class="stat-badge" style="background: rgba(29, 185, 84, 0.15); color: var(--spotify-green);">Spotify Kaynağı</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Destination Options -->
+                <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 1.5rem;">
+                    <h4 style="margin-bottom: 1rem; font-size: 1.1rem;">YouTube Hedef Liste Ayarları</h4>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem;">
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Yeni Liste Adı</label>
+                            <input type="text" id="target-name-input" class="form-control" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem;">Gizlilik</label>
+                            <select id="target-privacy-select" class="form-control">
+                                <option value="true" selected>Gizli (Sadece Ben)</option>
+                                <option value="false">Herkese Açık (Public)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Track Preview Table -->
+                <div class="glass-panel" style="padding: 1.5rem; margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1.1rem;">Şarkı Önizlemesi</h4>
+                    <table class="track-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">#</th>
+                                <th>Şarkı / Sanatçı</th>
+                                <th>Albüm</th>
+                                <th style="width: 80px;">Süre</th>
+                            </tr>
+                        </thead>
+                        <tbody id="track-list-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                    <div id="preview-more-tracks" style="text-align: center; color: var(--text-dim); margin-top: 1rem; font-size: 0.9rem;"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <button id="btn-start-transfer" class="btn-yt">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+                    </svg>
+                    YouTube Music'e Aktarımı Başlat
+                </button>
+            </div>
+        </section>
+
+        <!-- Tab 2: Settings -->
+        <section id="settings" class="tab-content">
+            <div class="settings-grid">
+                
+                <!-- Spotify Setup -->
+                <div class="glass-panel" style="padding: 1.75rem;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--spotify-green)">
+                            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                        </svg>
+                        <h3 style="font-size: 1.25rem;">Spotify Bağlantısı</h3>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                        Spotify listelerini sınırsız ve hızlı şekilde okumak için ücretsiz API anahtarı girin.
+                    </p>
+
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label>Spotify Client ID</label>
+                            <input type="text" id="cfg-spotify-client-id" class="form-control" placeholder="Örn: 4c3a7..." />
+                        </div>
+                        <div class="form-group">
+                            <label>Spotify Client Secret</label>
+                            <input type="password" id="cfg-spotify-client-secret" class="form-control" placeholder="Örn: 8b1f9..." />
+                            <div class="help-text">Anahtarlarınız sadece yerel makinenizde saklanır.</div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 1.25rem; font-size: 0.8rem; color: var(--text-muted);">
+                            <strong>Nasıl Alınır? (1 Dakika)</strong><br>
+                            1. <a href="https://developer.spotify.com/dashboard" target="_blank" style="color: var(--spotify-green);">developer.spotify.com/dashboard</a> adresine girin.<br>
+                            2. <strong>Create App</strong> butonuna basıp bir isim girin.<br>
+                            3. Settings sekmesinden Client ID ve Client Secret'ı kopyalayıp buraya yapıştırın.
+                        </div>
+
+                        <button type="submit" class="btn-secondary" style="width: 100%; margin-bottom: 0.75rem;">
+                            Anahtarları Kaydet
+                        </button>
+                    </form>
+
+                    <!-- Spotify User Login Action -->
+                    <div id="spotify-login-container" style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+                        <div id="spotify-user-connected" style="display: none; align-items: center; gap: 10px; background: rgba(29, 185, 84, 0.1); border: 1px solid rgba(29, 185, 84, 0.3); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 0.75rem;">
+                            <span style="font-size: 1.2rem;">👤</span>
+                            <div>
+                                <div style="font-weight: 700; color: var(--spotify-green);">Spotify Hesabı Bağlı</div>
+                                <div id="spotify-user-name" style="font-size: 0.8rem; color: var(--text-muted);">-</div>
+                            </div>
+                        </div>
+                        <button id="btn-spotify-login" class="btn-primary" style="width: 100%; justify-content: center; font-size: 0.95rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                            </svg>
+                            Spotify ile Giriş Yap (Yetkilendir)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- YouTube Music Setup -->
+                <div class="glass-panel" style="padding: 1.75rem;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--yt-red)">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <h3 style="font-size: 1.25rem;">YouTube Music Bağlantısı</h3>
+                    </div>
+
+                    <!-- Connected State -->
+                    <div id="yt-account-connected" style="display: none;">
+                        <div style="display: flex; align-items: center; gap: 12px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 1.25rem;">
+                            <img id="yt-account-photo" src="https://via.placeholder.com/44" style="width: 44px; height: 44px; border-radius: 50%;" />
+                            <div>
+                                <div id="yt-account-name" style="font-weight: 700;">YouTube Music Hesabı</div>
+                                <div id="yt-account-handle" style="font-size: 0.8rem; color: var(--text-muted);">Bağlandı</div>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                            Hesabınız başarıyla yetkilendirildi. Listeler bu hesaba eklenecektir (Google Cloud kota limiti yoktur).
+                        </p>
+                        <button id="btn-yt-disconnect" class="btn-secondary" style="width: 100%; color: #ef4444; border-color: rgba(239, 68, 68, 0.3);">
+                            Bağlantıyı Kes
+                        </button>
+                    </div>
+
+                    <!-- Disconnected State -->
+                    <div id="yt-account-disconnected">
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            Google Cloud API kotalarına (66 şarkı limitine) takılmamak için tarayıcı başlıklarıyla limitsiz bağlanın:
+                        </p>
+
+                        <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+                            <strong>Adım Adım Bağlanma Rehberi:</strong><br>
+                            1. Tarayıcınızda <a href="https://music.youtube.com" target="_blank" style="color: var(--yt-red);">music.youtube.com</a> adresini açıp giriş yapın.<br>
+                            2. Klavyeden <code>F12</code> tuşuna basın ve <strong>Network</strong> sekmesine gelin.<br>
+                            3. Sayfayı yenileyin. Listeden <strong>browse</strong> isteğine sağ tıklayın.<br>
+                            4. <strong>Copy ➔ Copy request headers</strong> deyin ve aşağıya yapıştırın.
+                        </div>
+
+                        <form id="yt-connect-form">
+                            <div class="form-group">
+                                <label>Request Headers İçeriği</label>
+                                <textarea id="yt-headers-input" class="form-control" placeholder="accept: */*&#10;authorization: SAPISIDHASH...&#10;cookie: SID=..."></textarea>
+                            </div>
+                            <button type="submit" id="btn-submit-yt" class="btn-primary" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #ff0000, #cc0000);">
+                                Bağlan ve Doğrula
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Advanced Tuning -->
+            <div class="glass-panel" style="padding: 1.75rem; margin-top: 1.5rem;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Gelişmiş Aktarım ve Eşleştirme Ayarları</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">İstekler Arası Bekleme (sn)</label>
+                        <input type="number" id="cfg-delay" step="0.05" class="form-control" value="0.35" />
+                        <div class="help-text">IP engeli yememek için her arama arasındaki bekleme (Önerilen: 0.35s).</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">Süre Toleransı (sn)</label>
+                        <input type="number" id="cfg-tolerance" class="form-control" value="7" />
+                        <div class="help-text">Şarkı süresi farkı (Yanlış veya 1 saatlik loop versiyonları eler).</div>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem;">Paket Boyutu (Batch Size)</label>
+                        <input type="number" id="cfg-batch" class="form-control" value="25" />
+                        <div class="help-text">Tek seferde listeye yazılan şarkı adedi (Önerilen: 25).</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: History -->
+        <section id="history" class="tab-content">
+            <div class="glass-panel" style="padding: 1.75rem;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 1rem;">Aktarım Geçmişi</h3>
+                <table class="track-table">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Kaynak Çalma Listesi</th>
+                            <th>Aktarılan</th>
+                            <th>Durum</th>
+                            <th>Süre</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Transfer Live Progress Modal -->
+    <div id="transfer-modal" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 style="font-size: 1.3rem; font-weight: 800;">Aktarım Sürüyor...</h3>
+                <button id="btn-close-modal" style="background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer;">&times;</button>
+            </div>
+
+            <div class="progress-container">
+                <div id="modal-progress-bar" class="progress-bar"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;">
+                <span id="modal-progress-text">Hazırlanıyor...</span>
+                <span id="modal-stats-text" style="color: var(--text-dim);">0 / 0 Şarkı</span>
+            </div>
+
+            <div id="live-console" class="live-console"></div>
+
+            <div style="display: flex; gap: 12px; margin-top: 1.5rem;">
+                <button id="btn-cancel-transfer" class="btn-secondary" style="flex: 1; color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                    İptal Et
+                </button>
+                <a id="btn-view-playlist" href="#" target="_blank" class="btn-primary" style="flex: 2; display: none; text-decoration: none; justify-content: center; background: linear-gradient(135deg, #ff0000, #cc0000);">
+                    YouTube Music'te Aç ↗
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
