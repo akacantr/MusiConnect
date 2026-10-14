@@ -1,5 +1,3 @@
-// MusiConnect Frontend Application Logic
-
 let currentJobId = null;
 let eventSource = null;
 let currentPreviewPlaylist = null;
@@ -10,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initEventListeners();
 });
 
-// Tab Switcher
 function initTabs() {
     const navButtons = document.querySelectorAll('.nav-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -32,26 +29,16 @@ function initTabs() {
 }
 
 function initEventListeners() {
-    // Preview Button
     document.getElementById('btn-preview').addEventListener('click', handlePreview);
     document.getElementById('spotify-url-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') handlePreview();
     });
 
-    // Start Transfer Button
     document.getElementById('btn-start-transfer').addEventListener('click', handleStartTransfer);
-
-    // Cancel Transfer Button
     document.getElementById('btn-cancel-transfer').addEventListener('click', handleCancelTransfer);
-
-    // Settings Form
     document.getElementById('settings-form').addEventListener('submit', handleSaveSettings);
-
-    // YouTube Connect Form
     document.getElementById('yt-connect-form').addEventListener('submit', handleConnectYouTube);
     document.getElementById('btn-yt-disconnect').addEventListener('click', handleDisconnectYouTube);
-
-    // Spotify Login Button
     document.getElementById('btn-spotify-login').addEventListener('click', handleSpotifyLogin);
 }
 
@@ -62,14 +49,13 @@ async function handleSpotifyLogin() {
         if (data.url) {
             window.location.href = data.url;
         } else {
-            alert('Giriş linki alınamadı: ' + (data.detail || 'Bilinmeyen hata'));
+            alert('Failed to get login link: ' + (data.detail || 'Unknown error'));
         }
     } catch (err) {
-        alert('Giriş başlatılamadı: ' + err.message);
+        alert('Could not start login: ' + err.message);
     }
 }
 
-// Fetch Global Connection Status
 async function fetchStatus() {
     try {
         const res = await fetch('/api/status');
@@ -86,41 +72,39 @@ function renderStatus(data) {
     const ytStatus = document.getElementById('yt-status-indicator');
     const ytText = document.getElementById('yt-status-text');
 
-    // Spotify status
     const spUserConnected = document.getElementById('spotify-user-connected');
     const spUserName = document.getElementById('spotify-user-name');
     const spLoginBtn = document.getElementById('btn-spotify-login');
 
     if (data.spotify.user_logged_in) {
         spStatus.className = 'status-indicator status-green';
-        spText.textContent = `Spotify: ${data.spotify.user_name || 'Bağlı'}`;
+        spText.textContent = `Spotify: ${data.spotify.user_name || 'Connected'}`;
         if (spUserConnected) spUserConnected.style.display = 'flex';
-        if (spUserName) spUserName.textContent = data.spotify.user_name || 'Giriş Yapıldı';
-        if (spLoginBtn) spLoginBtn.textContent = 'Farklı Hesapla Giriş Yap';
+        if (spUserName) spUserName.textContent = data.spotify.user_name || 'Logged In';
+        if (spLoginBtn) spLoginBtn.textContent = 'Log in with Different Account';
     } else if (data.spotify.connected) {
         spStatus.className = 'status-indicator status-green';
-        spText.textContent = 'Spotify: Giriş Bekleniyor';
+        spText.textContent = 'Spotify: Login Required';
         if (spUserConnected) spUserConnected.style.display = 'none';
-        if (spLoginBtn) spLoginBtn.textContent = 'Spotify ile Giriş Yap (Yetkilendir)';
+        if (spLoginBtn) spLoginBtn.textContent = 'Log in with Spotify (Authorize)';
     } else {
         spStatus.className = 'status-indicator status-red';
-        spText.textContent = 'Spotify: Anahtar Gerekli';
+        spText.textContent = 'Spotify: Credentials Required';
         if (spUserConnected) spUserConnected.style.display = 'none';
     }
 
-    // YouTube status
     const ytCardConnected = document.getElementById('yt-account-connected');
     const ytCardDisconnected = document.getElementById('yt-account-disconnected');
 
     if (data.youtube.connected) {
         ytStatus.className = 'status-indicator status-green';
-        ytText.textContent = 'YouTube: Bağlı';
+        ytText.textContent = 'YouTube: Connected';
         
         ytCardConnected.style.display = 'block';
         ytCardDisconnected.style.display = 'none';
 
         if (data.youtube.account) {
-            document.getElementById('yt-account-name').textContent = data.youtube.account.accountName || 'YouTube Music Hesabı';
+            document.getElementById('yt-account-name').textContent = data.youtube.account.accountName || 'YouTube Music Account';
             document.getElementById('yt-account-handle').textContent = data.youtube.account.channelHandle || '';
             if (data.youtube.account.accountPhotoUrl) {
                 document.getElementById('yt-account-photo').src = data.youtube.account.accountPhotoUrl;
@@ -128,13 +112,12 @@ function renderStatus(data) {
         }
     } else {
         ytStatus.className = 'status-indicator status-red';
-        ytText.textContent = 'YouTube: Giriş Yapılmadı';
+        ytText.textContent = 'YouTube: Not Connected';
 
         ytCardConnected.style.display = 'none';
         ytCardDisconnected.style.display = 'block';
     }
 
-    // Populate settings inputs
     if (data.spotify.client_id) {
         document.getElementById('cfg-spotify-client-id').value = data.spotify.client_id;
     }
@@ -145,19 +128,18 @@ function renderStatus(data) {
     }
 }
 
-// Preview Spotify Playlist
 async function handlePreview() {
     const input = document.getElementById('spotify-url-input');
     const url = input.value.trim();
     if (!url) {
-        alert('Lütfen geçerli bir Spotify çalma listesi linki girin.');
+        alert('Please enter a valid Spotify playlist link.');
         return;
     }
 
     const previewContainer = document.getElementById('preview-container');
     const btnPreview = document.getElementById('btn-preview');
     btnPreview.disabled = true;
-    btnPreview.innerHTML = '<span>Yükleniyor...</span>';
+    btnPreview.innerHTML = '<span>Loading...</span>';
 
     try {
         const res = await fetch('/api/spotify/preview', {
@@ -168,24 +150,24 @@ async function handlePreview() {
         const data = await res.json();
 
         if (!res.ok) {
-            throw new Error(data.detail || 'Liste bilgileri alınamadı.');
+            throw new Error(data.detail || 'Failed to load playlist details.');
         }
 
         currentPreviewPlaylist = data.playlist;
         renderPreview(data);
         previewContainer.style.display = 'block';
     } catch (err) {
-        if (err.message.includes('yetkilendirin') || err.message.includes('authentication required')) {
-            if (confirm(err.message + '\n\nŞimdi Spotify ile giriş yapıp yetkilendirmek ister misiniz?')) {
+        if (err.message.includes('yetkilendirin') || err.message.includes('authentication required') || err.message.includes('Authorize')) {
+            if (confirm(err.message + '\n\nWould you like to log in and authorize Spotify now?')) {
                 handleSpotifyLogin();
             }
         } else {
-            alert(`Hata: ${err.message}`);
+            alert(`Error: ${err.message}`);
         }
         previewContainer.style.display = 'none';
     } finally {
         btnPreview.disabled = false;
-        btnPreview.innerHTML = '<span>Önizle</span>';
+        btnPreview.innerHTML = '<span>Preview</span>';
     }
 }
 
@@ -194,8 +176,8 @@ function renderPreview(data) {
 
     document.getElementById('preview-cover').src = playlist.image_url || 'https://via.placeholder.com/130?text=Playlist';
     document.getElementById('preview-title').textContent = playlist.name;
-    document.getElementById('preview-owner').textContent = playlist.owner ? `Oluşturan: ${playlist.owner}` : '';
-    document.getElementById('preview-count').textContent = `${total_tracks} Şarkı`;
+    document.getElementById('preview-owner').textContent = playlist.owner ? `Created by: ${playlist.owner}` : '';
+    document.getElementById('preview-count').textContent = `${total_tracks} Tracks`;
     document.getElementById('target-name-input').value = playlist.name;
 
     const tbody = document.getElementById('track-list-body');
@@ -225,14 +207,13 @@ function renderPreview(data) {
 
     const moreText = document.getElementById('preview-more-tracks');
     if (total_tracks > preview_tracks.length) {
-        moreText.textContent = `... ve ${total_tracks - preview_tracks.length} şarkı daha (tüm liste aktarılacak)`;
+        moreText.textContent = `... and ${total_tracks - preview_tracks.length} more tracks (the entire playlist will be transferred)`;
         moreText.style.display = 'block';
     } else {
         moreText.style.display = 'none';
     }
 }
 
-// Start Transfer Job
 async function handleStartTransfer() {
     const url = document.getElementById('spotify-url-input').value.trim();
     const customName = document.getElementById('target-name-input').value.trim();
@@ -250,14 +231,14 @@ async function handleStartTransfer() {
         const data = await res.json();
 
         if (!res.ok) {
-            throw new Error(data.detail || 'Aktarım başlatılamadı.');
+            throw new Error(data.detail || 'Failed to start transfer.');
         }
 
         currentJobId = data.job_id;
         openTransferModal();
         connectEventSource(currentJobId);
     } catch (err) {
-        alert(`Aktarım Başlatma Hatası: ${err.message}`);
+        alert(`Failed to Start Transfer: ${err.message}`);
     } finally {
         btnStart.disabled = false;
     }
@@ -267,10 +248,9 @@ function openTransferModal() {
     const modal = document.getElementById('transfer-modal');
     modal.classList.add('active');
 
-    // Reset modal state
     document.getElementById('modal-progress-bar').style.width = '0%';
-    document.getElementById('modal-progress-text').textContent = 'Hazırlanıyor...';
-    document.getElementById('modal-stats-text').textContent = '0 / 0 Şarkı';
+    document.getElementById('modal-progress-text').textContent = 'Preparing...';
+    document.getElementById('modal-stats-text').textContent = '0 / 0 Tracks';
     document.getElementById('live-console').innerHTML = '';
     document.getElementById('btn-cancel-transfer').style.display = 'inline-block';
     document.getElementById('btn-view-playlist').style.display = 'none';
@@ -301,27 +281,27 @@ function handleStreamEvent(data, consoleEl) {
     const sText = document.getElementById('modal-stats-text');
 
     if (data.type === 'start') {
-        logConsole(consoleEl, `🚀 Aktarım başladı! Toplam: ${data.total} şarkı`, 'info');
-        pText.textContent = `0 / ${data.total} şarkı işlendi (%0)`;
+        logConsole(consoleEl, `🚀 Transfer started! Total: ${data.total} tracks`, 'info');
+        pText.textContent = `0 / ${data.total} tracks processed (0%)`;
     } else if (data.type === 'item_updated') {
         const item = data.item;
         const percent = Math.round((data.processed / data.total) * 100);
         pBar.style.width = `${percent}%`;
-        pText.textContent = `${data.processed} / ${data.total} şarkı işlendi (%${percent})`;
-        sText.textContent = `Eşleşen: ${data.processed - data.failed} | Başarısız: ${data.failed}`;
+        pText.textContent = `${data.processed} / ${data.total} tracks processed (${percent}%)`;
+        sText.textContent = `Matched: ${data.processed - data.failed} | Failed: ${data.failed}`;
 
         if (item.status === 'matched') {
-            logConsole(consoleEl, `[${item.index}/${data.total}] 🎵 Eşleşti: ${item.source_track.title} ➔ ${item.matched_result.title} (Skor: ${item.matched_result.match_score}%)`);
+            logConsole(consoleEl, `[${item.index}/${data.total}] 🎵 Matched: ${item.source_track.title} ➔ ${item.matched_result.title} (Score: ${item.matched_result.match_score}%)`);
         } else if (item.status === 'not_found') {
-            logConsole(consoleEl, `[${item.index}/${data.total}] ⚠️ Bulunamadı: ${item.source_track.title} - ${item.source_track.artists.join(', ')}`, 'warning');
+            logConsole(consoleEl, `[${item.index}/${data.total}] ⚠️ Not found: ${item.source_track.title} - ${item.source_track.artists.join(', ')}`, 'warning');
         }
     } else if (data.type === 'batch_added') {
-        logConsole(consoleEl, `💾 ${data.added_count} şarkı YouTube Music listesine yazıldı! (Toplam eklenen: ${data.total_added})`, 'success');
+        logConsole(consoleEl, `💾 ${data.added_count} tracks added to YouTube Music! (Total added: ${data.total_added})`, 'success');
     } else if (data.type === 'finished') {
         const summary = data.summary;
         pBar.style.width = '100%';
-        pText.textContent = `Tamamlandı! (${summary.added_count}/${summary.total_tracks} şarkı YouTube Music'e aktarıldı)`;
-        logConsole(consoleEl, `🎉 AKTARIM TAMAMLANDI! Süre: ${summary.duration_seconds} sn`, 'success');
+        pText.textContent = `Completed! (${summary.added_count}/${summary.total_tracks} tracks transferred to YouTube Music)`;
+        logConsole(consoleEl, `🎉 TRANSFER COMPLETED! Duration: ${summary.duration_seconds}s`, 'success');
 
         document.getElementById('btn-cancel-transfer').style.display = 'none';
         const viewBtn = document.getElementById('btn-view-playlist');
@@ -330,8 +310,8 @@ function handleStreamEvent(data, consoleEl) {
 
         if (eventSource) eventSource.close();
     } else if (data.type === 'error') {
-        logConsole(consoleEl, `❌ HATA: ${data.error}`, 'error');
-        pText.textContent = 'Aktarım hata ile sonuçlandı.';
+        logConsole(consoleEl, `❌ ERROR: ${data.error}`, 'error');
+        pText.textContent = 'Transfer ended with an error.';
         if (eventSource) eventSource.close();
     }
 }
@@ -350,23 +330,21 @@ function logConsole(consoleEl, text, level = 'default') {
 
 async function handleCancelTransfer() {
     if (!currentJobId) return;
-    if (!confirm('Aktarım işlemini iptal etmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to cancel the transfer?')) return;
 
     try {
         await fetch(`/api/transfer/cancel/${currentJobId}`, { method: 'POST' });
-        logConsole(document.getElementById('live-console'), '🛑 İptal isteği gönderildi...', 'warning');
+        logConsole(document.getElementById('live-console'), '🛑 Cancellation requested...', 'warning');
     } catch (err) {
         console.error('Cancel error:', err);
     }
 }
 
-// Close Modal
 document.getElementById('btn-close-modal').addEventListener('click', () => {
     document.getElementById('transfer-modal').classList.remove('active');
     if (eventSource) eventSource.close();
 });
 
-// Settings Save
 async function handleSaveSettings(e) {
     e.preventDefault();
     const clientId = document.getElementById('cfg-spotify-client-id').value.trim();
@@ -393,26 +371,25 @@ async function handleSaveSettings(e) {
         });
         const data = await res.json();
         if (data.success) {
-            alert('Ayarlar başarıyla kaydedildi!');
+            alert('Settings saved successfully!');
             fetchStatus();
         }
     } catch (err) {
-        alert(`Ayarlar kaydedilemedi: ${err.message}`);
+        alert(`Failed to save settings: ${err.message}`);
     }
 }
 
-// YouTube Connect
 async function handleConnectYouTube(e) {
     e.preventDefault();
     const headersRaw = document.getElementById('yt-headers-input').value.trim();
     if (!headersRaw) {
-        alert('Lütfen kopyaladığınız request headers içeriğini yapıştırın.');
+        alert('Please paste the copied request headers or cURL command.');
         return;
     }
 
     const btn = document.getElementById('btn-submit-yt');
     btn.disabled = true;
-    btn.textContent = 'Doğrulanıyor...';
+    btn.textContent = 'Verifying...';
 
     try {
         const res = await fetch('/api/youtube/connect', {
@@ -423,23 +400,22 @@ async function handleConnectYouTube(e) {
         const data = await res.json();
 
         if (!res.ok) {
-            throw new Error(data.detail || 'Giriş yapılamadı.');
+            throw new Error(data.detail || 'Failed to connect.');
         }
 
-        alert('YouTube Music bağlantısı başarıyla kuruldu!');
+        alert('YouTube Music connection established successfully!');
         document.getElementById('yt-headers-input').value = '';
         fetchStatus();
     } catch (err) {
-        alert(`Bağlantı Hatası: ${err.message}`);
+        alert(`Connection Error: ${err.message}`);
     } finally {
         btn.disabled = false;
-        btn.textContent = 'Bağlan ve Doğrula';
+        btn.textContent = 'Connect & Verify';
     }
 }
 
-// YouTube Disconnect
 async function handleDisconnectYouTube() {
-    if (!confirm('YouTube Music bağlantısını kesmek istediğinize emin misiniz?')) return;
+    if (!confirm('Are you sure you want to disconnect from YouTube Music?')) return;
     try {
         await fetch('/api/youtube/disconnect', { method: 'POST' });
         fetchStatus();
@@ -448,7 +424,6 @@ async function handleDisconnectYouTube() {
     }
 }
 
-// History
 async function fetchHistory() {
     try {
         const res = await fetch('/api/history');
@@ -464,23 +439,23 @@ function renderHistory(list) {
     tbody.innerHTML = '';
 
     if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">Henüz bir aktarım geçmişi yok.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">No transfer history yet.</td></tr>';
         return;
     }
 
     list.forEach(item => {
         const tr = document.createElement('tr');
         const badgeColor = item.status === 'completed' ? '#10b981' : (item.status === 'cancelled' ? '#f59e0b' : '#ef4444');
-        const statusText = item.status === 'completed' ? 'Tamamlandı' : (item.status === 'cancelled' ? 'İptal Edildi' : 'Hata');
+        const statusText = item.status === 'completed' ? 'Completed' : (item.status === 'cancelled' ? 'Cancelled' : 'Failed');
 
         tr.innerHTML = `
             <td>${item.created_at || '-'}</td>
             <td><strong>${escapeHtml(item.source_playlist_name)}</strong></td>
             <td>${item.added_count} / ${item.total_tracks}</td>
             <td><span style="color: ${badgeColor}; font-weight: 700;">● ${statusText}</span></td>
-            <td>${item.duration_seconds} sn</td>
+            <td>${item.duration_seconds}s</td>
             <td>
-                ${item.target_playlist_url ? `<a href="${item.target_playlist_url}" target="_blank" style="color: var(--yt-red); text-decoration: none; font-weight: 600;">YouTube'da Aç ↗</a>` : '-'}
+                ${item.target_playlist_url ? `<a href="${item.target_playlist_url}" target="_blank" style="color: var(--yt-red); text-decoration: none; font-weight: 600;">Open in YouTube Music ↗</a>` : '-'}
             </td>
         `;
         tbody.appendChild(tr);

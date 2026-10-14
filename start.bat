@@ -1,5 +1,5 @@
 @echo off
 title MusiConnect Launcher
-echo MusiConnect baslatiliyor...
+echo Starting MusiConnect...
 py run.py
 pause

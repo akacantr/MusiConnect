@@ -16,10 +16,10 @@ class Settings:
         self.spotify_client_secret: str = ""
         self.spotify_redirect_uri: str = "http://127.0.0.1:8000/callback"
         
-        self.ytmusic_auth_type: str = "browser"  # 'browser' or 'oauth'
-        self.transfer_delay: float = 0.35        # delay between searches to prevent 429
-        self.duration_tolerance: int = 7         # max acceptable seconds difference
-        self.batch_size: int = 25                # number of songs to add to playlist in one batch
+        self.ytmusic_auth_type: str = "browser"
+        self.transfer_delay: float = 0.35
+        self.duration_tolerance: int = 7
+        self.batch_size: int = 25
         
         self.load()
 

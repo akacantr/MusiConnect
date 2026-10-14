@@ -1,7 +1,7 @@
 import json
 import asyncio
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -65,7 +65,7 @@ def get_status() -> Dict[str, Any]:
 def get_spotify_login_url() -> Dict[str, Any]:
     auth_url = spotify_provider.get_auth_url()
     if not auth_url:
-        raise HTTPException(status_code=400, detail="Spotify Client ID ve Secret tanımlı değil.")
+        raise HTTPException(status_code=400, detail="Spotify Client ID and Secret are not set.")
     return {"url": auth_url}
 
 @router.post("/settings")
@@ -88,11 +88,11 @@ def update_settings(data: SettingsUpdateModel) -> Dict[str, Any]:
 @router.post("/youtube/connect")
 def connect_youtube(data: YouTubeHeadersModel) -> Dict[str, Any]:
     if not data.headers_raw.strip():
-        raise HTTPException(status_code=400, detail="Lütfen tarayıcı başlıklarını (request headers) yapıştırın.")
+        raise HTTPException(status_code=400, detail="Please paste request headers.")
 
     res = youtube_provider.save_browser_headers(data.headers_raw)
     if not res.get("success"):
-        raise HTTPException(status_code=400, detail=res.get("error", "Kimlik doğrulama başarısız."))
+        raise HTTPException(status_code=400, detail=res.get("error", "Authentication failed."))
     
     return {"success": True, "account": res.get("account")}
 
@@ -122,7 +122,7 @@ def preview_spotify_playlist(data: PlaylistPreviewModel) -> Dict[str, Any]:
 @router.post("/transfer/start")
 async def start_transfer(data: TransferStartModel) -> Dict[str, Any]:
     if not youtube_provider.is_authenticated():
-        raise HTTPException(status_code=400, detail="YouTube Music hesabınız bağlı değil. Lütfen Ayarlar sayfasından giriş yapın.")
+        raise HTTPException(status_code=400, detail="YouTube Music account is not connected. Please connect from Settings.")
 
     try:
         job_id = await transfer_manager.start_transfer(
@@ -138,7 +138,7 @@ async def start_transfer(data: TransferStartModel) -> Dict[str, Any]:
 async def stream_transfer(job_id: str):
     job = transfer_manager.active_jobs.get(job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="Aktarım işlemi bulunamadı.")
+        raise HTTPException(status_code=404, detail="Transfer job not found.")
 
     queue: asyncio.Queue = job["event_queue"]
 
@@ -150,7 +150,6 @@ async def stream_transfer(job_id: str):
                 if event.get("type") in ["finished", "error"]:
                     break
             except asyncio.TimeoutError:
-                # Keep-alive ping
                 yield ": keep-alive\n\n"
             except Exception:
                 break

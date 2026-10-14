@@ -28,11 +28,9 @@ class SpotifyProvider(BaseMusicProvider):
                     open_browser=False
                 )
                 
-                # If user already logged in via OAuth, use OAuth session
                 if self._oauth.get_cached_token():
                     self._sp = spotipy.Spotify(auth_manager=self._oauth, requests_timeout=15)
                 else:
-                    # Otherwise use ClientCredentials until user logs in
                     cc = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
                     self._sp = spotipy.Spotify(auth_manager=cc, requests_timeout=15)
             except Exception as e:
@@ -103,14 +101,14 @@ class SpotifyProvider(BaseMusicProvider):
         if not self._sp:
             self._init_client()
         if not self._sp:
-            raise ValueError("Spotify API anahtarları tanımlanmamış. Lütfen Ayarlar sayfasından Client ID ve Secret girin.")
+            raise ValueError("Spotify API keys are not set. Please provide Client ID and Secret in Settings.")
 
         p_id = self.extract_playlist_id(playlist_id_or_url)
         try:
             data = self._sp.playlist(p_id)
         except spotipy.SpotifyException as se:
             if se.http_status == 401 or "Valid user authentication required" in str(se):
-                raise ValueError("Bu çalma listesine erişebilmek için lütfen 'Spotify ile Giriş Yap' butonuna tıklayarak hesabınızı yetkilendirin.")
+                raise ValueError("To access this playlist, please authorize your account by clicking 'Log in with Spotify'.")
             raise se
         
         image_url = None
@@ -125,7 +123,7 @@ class SpotifyProvider(BaseMusicProvider):
 
         return Playlist(
             id=data["id"],
-            name=data.get("name", "İsimsiz Liste"),
+            name=data.get("name", "Untitled Playlist"),
             description=data.get("description", ""),
             track_count=track_count,
             image_url=image_url,
@@ -137,7 +135,7 @@ class SpotifyProvider(BaseMusicProvider):
         if not self._sp:
             self._init_client()
         if not self._sp:
-            raise ValueError("Spotify API anahtarları tanımlanmamış. Lütfen Ayarlar sayfasından Client ID ve Secret girin.")
+            raise ValueError("Spotify API keys are not set. Please provide Client ID and Secret in Settings.")
 
         p_id = self.extract_playlist_id(playlist_id_or_url)
         tracks: List[Track] = []
@@ -154,7 +152,7 @@ class SpotifyProvider(BaseMusicProvider):
                 )
             except spotipy.SpotifyException as se:
                 if se.http_status == 401 or "Valid user authentication required" in str(se):
-                    raise ValueError("Bu çalma listesine erişebilmek için lütfen 'Spotify ile Giriş Yap' butonuna tıklayarak hesabınızı yetkilendirin.")
+                    raise ValueError("To access this playlist, please authorize your account by clicking 'Log in with Spotify'.")
                 raise se
 
             items = response.get("items", [])
@@ -193,10 +191,10 @@ class SpotifyProvider(BaseMusicProvider):
         return tracks
 
     def search_track(self, track: Track, tolerance_seconds: int = 7) -> Optional[SearchResult]:
-        raise NotImplementedError("Spotify arama henüz hedeflenmedi.")
+        raise NotImplementedError("Spotify search is not implemented.")
 
     def create_playlist(self, title: str, description: str = "", is_private: bool = True) -> str:
-        raise NotImplementedError("Spotify'a aktarım için Spotify OAuth gerekir.")
+        raise NotImplementedError("Exporting to Spotify requires Spotify OAuth.")
 
     def add_tracks_to_playlist(self, playlist_id: str, track_ids: List[str]) -> Dict[str, Any]:
-        raise NotImplementedError("Spotify'a aktarım için Spotify OAuth gerekir.")
+        raise NotImplementedError("Exporting to Spotify requires Spotify OAuth.")

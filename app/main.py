@@ -15,7 +15,6 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for future website integration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,10 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include API Router
 app.include_router(api_router)
 
-# Mount static files
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 @app.get("/")
@@ -39,14 +36,14 @@ def spotify_oauth_callback(code: str):
     from app.api.routes import spotify_provider
     from fastapi.responses import HTMLResponse
     success = spotify_provider.handle_callback(code)
-    msg = "🎉 Spotify Hesabınız Başarıyla Bağlandı!" if success else "❌ Giriş yapılırken bir sorun oluştu."
+    msg = "🎉 Spotify Account Connected Successfully!" if success else "❌ An error occurred during authentication."
     return HTMLResponse(f"""
         <!DOCTYPE html>
         <html>
             <head>
                 <meta charset="utf-8">
                 <meta http-equiv="refresh" content="2;url=/" />
-                <title>Spotify Bağlantısı</title>
+                <title>Spotify Connection</title>
                 <style>
                     body {{ background: #090d16; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }}
                     .box {{ text-align: center; background: rgba(255,255,255,0.05); padding: 2rem 3rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); }}
@@ -56,7 +53,7 @@ def spotify_oauth_callback(code: str):
             <body>
                 <div class="box">
                     <h2>{msg}</h2>
-                    <p>MusiConnect uygulamasına yönlendiriliyorsunuz...</p>
+                    <p>Redirecting to MusiConnect...</p>
                 </div>
             </body>
         </html>

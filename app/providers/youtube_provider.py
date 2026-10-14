@@ -9,7 +9,7 @@ from app.config import settings, YTMUSIC_AUTH_FILE
 class YouTubeProvider(BaseMusicProvider):
     def __init__(self):
         self._yt: Optional[YTMusic] = None
-        self._search_yt: YTMusic = YTMusic()  # Unauthenticated instance for public search fallback
+        self._search_yt: YTMusic = YTMusic()
         self._init_client()
 
     def _init_client(self):
@@ -43,21 +43,18 @@ class YouTubeProvider(BaseMusicProvider):
             return None
         try:
             return self._yt.get_account_info()
-        except Exception as e:
+        except Exception:
             return None
 
     @staticmethod
     def _clean_and_parse_input(raw_text: str) -> str:
         import re
         text = raw_text.strip()
-        # If user copied as cURL (bash or cmd)
         if text.startswith("curl") or "-H" in text or "-b" in text:
             headers = []
-            # 1. Match all -H 'Key: Value'
             for match in re.finditer(r"-H\s+['\"\^](.+?):\s*(.+?)['\"\^](?:\s|$|\\|\^)", text):
                 headers.append(f"{match.group(1).strip()}: {match.group(2).strip()}")
             
-            # 2. Match -b 'cookies' or --cookie 'cookies'
             cookie_match = re.search(r"(?:-b|--cookie)\s+['\"\^](.+?)['\"\^]", text)
             if cookie_match:
                 headers.append(f"cookie: {cookie_match.group(1).strip()}")
@@ -77,14 +74,13 @@ class YouTubeProvider(BaseMusicProvider):
             else:
                 if YTMUSIC_AUTH_FILE.exists():
                     YTMUSIC_AUTH_FILE.unlink()
-                return {"success": False, "error": "Kimlik doğrulama başarısız oldu. Lütfen başlıkları (headers) kontrol edip tekrar deneyin."}
+                return {"success": False, "error": "Authentication failed. Please check the request headers and try again."}
         except Exception as e:
             return {"success": False, "error": str(e)}
 
     def search_track(self, track: Track, tolerance_seconds: int = 7) -> Optional[SearchResult]:
         yt_client = self._yt if self._yt else self._search_yt
         
-        # 1. Search queries in order of precision
         queries = [
             f"{track.artist_str} - {track.title}",
             f"{track.title} {track.artists[0] if track.artists else ''}",
@@ -95,10 +91,7 @@ class YouTubeProvider(BaseMusicProvider):
 
         for query in queries:
             try:
-                # First attempt: search in 'songs' filter (official releases)
                 results = yt_client.search(query, filter="songs", limit=10)
-                
-                # If no songs found, fallback to general search
                 if not results:
                     results = yt_client.search(query, limit=10)
 
@@ -111,7 +104,6 @@ class YouTubeProvider(BaseMusicProvider):
                     artists = [a.get("name", "") for a in item.get("artists", []) if a.get("name")]
                     duration_sec = item.get("duration_seconds", 0)
                     if not duration_sec and "duration" in item:
-                        # parse MM:SS string if needed
                         parts = str(item["duration"]).split(":")
                         if len(parts) == 2:
                             duration_sec = int(parts[0]) * 60 + int(parts[1])
@@ -146,7 +138,6 @@ class YouTubeProvider(BaseMusicProvider):
                             is_explicit=item.get("isExplicit", False)
                         )
 
-                # If we found a high quality match (> 75 score), stop searching further queries
                 if highest_score >= 75.0:
                     break
 
@@ -154,7 +145,6 @@ class YouTubeProvider(BaseMusicProvider):
                 print(f"[YouTubeProvider] Search error on query '{query}': {e}")
                 continue
 
-        # If score is below acceptable threshold, reject match
         if best_result and best_result.match_score >= 40.0:
             return best_result
         return None
@@ -163,13 +153,12 @@ class YouTubeProvider(BaseMusicProvider):
         if not self._yt:
             self._init_client()
         if not self._yt:
-            raise ValueError("YouTube Music hesabı bağlı değil. Lütfen Ayarlar sayfasından giriş yapın.")
+            raise ValueError("YouTube Music account is not connected. Please connect from Settings.")
 
         privacy = "PRIVATE" if is_private else "PUBLIC"
         desc = description or "Transferred via MusiConnect"
         playlist_id = self._yt.create_playlist(title=title, description=desc, privacy_status=privacy)
         
-        # When created, ytmusicapi might return a string or dict
         if isinstance(playlist_id, dict):
             return playlist_id.get("id", str(playlist_id))
         return str(playlist_id)
@@ -178,7 +167,7 @@ class YouTubeProvider(BaseMusicProvider):
         if not self._yt:
             self._init_client()
         if not self._yt:
-            raise ValueError("YouTube Music hesabı bağlı değil.")
+            raise ValueError("YouTube Music account is not connected.")
 
         if not track_ids:
             return {"status": "SUCCESS", "added": 0}

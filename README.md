@@ -1,71 +1,75 @@
 # 🎵 MusiConnect
 
-Spotify çalma listelerinizi (**şarkı sayısı sınırı olmaksızın**) en doğru eşleşmelerle YouTube Music'e aktaran, modern web arayüzüne sahip kişisel müzik transfer uygulaması.
+A modern web application to synchronize and transfer your Spotify playlists to YouTube Music with zero track limits and accurate track matching.
 
 ---
 
-## ✨ Özellikler
+## ✨ Features
 
-- **Limitsiz Aktarım (Kota Dostu):** Resmi YouTube Data API'nin günlük 66 şarkı sınırlamasına takılmaz. `ytmusicapi` altyapısı sayesinde 100, 500 veya 1.000+ şarkılık listeleri tek seferde aktarır.
-- **Akıllı Şarkı Eşleştirme (Smart Matcher):**
-  - Gereksiz başlık eklerini (örn. `Official Video`, `Remastered`, `Lyrics`) otomatik temizler.
-  - Şarkının orijinal süresi ile YouTube'daki videonun süresini karşılaştırır (varsayılan: ±7 sn tolerans). Böylece 1 saatlik loop'lar, röportajlar veya uzatılmış canlı kayıtlar elenir.
-  - YouTube Music'in "Şarkılar" (Songs) kategorisindeki resmi plak şirketi yüklemelerine öncelik verir.
-- **Toplu İşlem & Hız Koruma (Batching & Anti-RateLimit):** Şarkıları YouTube Music'e 25'erli paketler halinde ekler ve sunucu engeline takılmamak için istekler arasına güvenli bekleme süreleri koyar.
-- **Canlı İlerleme Çubuğu:** Web arayüzünde anlık olarak hangi şarkının işlendiğini, eşleşme skorunu ve aktarım durumunu canlı izleyebilirsiniz.
-- **Modüler & Genişletilebilir Mimari:** `BaseMusicProvider` arayüzü sayesinde ileride Apple Music, Deezer vb. platformlar kolayca eklenebilir.
+- **Unlimited Transfers (Quota Friendly):** Bypasses the strict 66-tracks/day quota limit of the official YouTube Data API by leveraging `ytmusicapi` to transfer playlists of 100, 500, or 1,000+ tracks seamlessly.
+- **Smart Track Matching:**
+  - Automatically cleans unnecessary video noise (e.g., `Official Video`, `Remastered`, `Lyrics`, `Visualizer`).
+  - Strict duration validation (default ±7s tolerance) to eliminate 1-hour loops, interviews, podcasts, and extended live cuts.
+  - Prioritizes official label uploads in the YouTube Music "Songs" category.
+- **Batch Processing & Rate-Limit Safeguards:** Adds songs to YouTube playlists in batches of 25 with polite delay intervals to prevent server throttling.
+- **Live Real-time Progress Bar:** Watch the live transfer status, matching scores, added tracks, and skipped items in real-time.
+- **Extensible Architecture:** Designed with `BaseMusicProvider` abstraction to support other platforms (such as Apple Music or Deezer) in the future.
 
 ---
 
-## 🚀 Hızlı Başlangıç
+## 🚀 Quick Start
 
-### 1. Çalıştırma
-Uygulamayı başlatmak için proje klasöründeki **`start.bat`** dosyasına çift tıklayın veya terminalden çalıştırın:
+### 1. Launching the App
+Double-click `start.bat` or run from your terminal:
 
 ```powershell
 py run.py
 ```
 
-Tarayıcınız otomatik olarak `http://127.0.0.1:8000` adresinde açılacaktır.
+Your browser will automatically open at `http://127.0.0.1:8000`.
 
 ---
 
-## 🔑 Bağlantı Kurulumu
+## 🔑 Authentication Setup
 
-### 1. Spotify Bağlantısı
-1. [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) adresine gidin ve Spotify hesabınızla giriş yapın.
-2. **Create app** butonuna basarak bir uygulama oluşturun (İsim olarak `MusiConnect` yazabilirsiniz).
-3. Uygulamanızın **Settings** bölümünden **Client ID** ve **Client Secret** değerlerini kopyalayın.
-4. MusiConnect web arayüzündeki **Bağlantılar & Ayarlar** sekmesine yapıştırıp **Kaydet** butonuna basın.
+### 1. Spotify Connection
+1. Visit [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and sign in.
+2. Click **Create app** (you can name it `MusiConnect`).
+3. Set Redirect URI to `http://127.0.0.1:8000/callback` and select **Web API**.
+4. In your app's **Settings**, copy your **Client ID** and **Client Secret**.
+5. Paste them into the **Connections & Settings** tab in MusiConnect, then click **Log in with Spotify (Authorize)**.
 
-### 2. YouTube Music Bağlantısı (Kota Sınırsız)
-1. Tarayıcınızda [music.youtube.com](https://music.youtube.com) adresini açıp Google hesabınızla oturum açın.
-2. Klavyeden **F12** tuşuna basarak Geliştirici Araçlarını açın ve **Network (Ağ)** sekmesine gelin.
-3. Sayfayı yenileyin veya arama yapın. Network listesinde görünen **browse** (veya herhangi bir) isteğe sağ tıklayın.
-4. **Copy ➔ Copy request headers** (İstek başlıklarını kopyala) seçeneğine tıklayın.
-5. MusiConnect web arayüzündeki **YouTube Music** kutusuna yapıştırıp **Bağlan ve Doğrula** butonuna basın.
+### 2. YouTube Music Connection
+1. Open [music.youtube.com](https://music.youtube.com) and ensure you are logged in to your Google/YouTube account.
+2. Press **F12** to open Developer Tools and go to the **Network** tab (filter by `Fetch/XHR`).
+3. Click on **Library** or refresh the page. Right-click the `browse` request.
+4. Select **Copy ➔ Copy as cURL (bash)**.
+5. Paste it into the YouTube Music box in MusiConnect and click **Connect & Verify**.
 
 ---
 
-## 📁 Proje Mimarisi
+## 📁 Project Architecture
 
 ```text
 MusiConnect/
 ├── app/
-│   ├── config.py             # Ayarlar ve dosya yönetimi
-│   ├── main.py               # FastAPI uygulaması ve CORS
+│   ├── config.py
+│   ├── main.py
 │   ├── api/
-│   │   └── routes.py         # REST & Server-Sent Events (SSE) uç noktaları
+│   │   └── routes.py
 │   ├── core/
-│   │   ├── base_provider.py  # Genişletilebilir platform arayüzü (BaseMusicProvider)
-│   │   ├── matcher.py        # Süre ve metin benzerliği hesaplayan akıllı algoritma
-│   │   └── transfer.py       # Arka plan aktarım yöneticisi ve kuyruk sistemi
+│   │   ├── base_provider.py
+│   │   ├── matcher.py
+│   │   └── transfer.py
 │   ├── providers/
-│   │   ├── spotify_provider.py # Spotify API entegrasyonu ve sayfalama
-│   │   └── youtube_provider.py # YouTube Music arama ve liste oluşturma
-│   └── static/               # Modern Glassmorphic Dark UI (HTML, CSS, JS)
-├── data/                     # Yerel ayarlar ve geçmiş (gitignored)
+│   │   ├── spotify_provider.py
+│   │   └── youtube_provider.py
+│   └── static/
+│       ├── index.html
+│       ├── css/style.css
+│       └── js/app.js
+├── data/
 ├── requirements.txt
-├── run.py                    # Başlatıcı script
-└── start.bat                 # Windows tek tıkla başlatıcı
+├── run.py
+└── start.bat
 ```

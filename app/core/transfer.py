@@ -14,7 +14,7 @@ class TransferItem(BaseModel):
     index: int
     source_track: Track
     matched_result: Optional[SearchResult] = None
-    status: str = "pending"  # pending, matched, added, not_found, error
+    status: str = "pending"
     error: Optional[str] = None
 
 class TransferJobState(BaseModel):
@@ -27,7 +27,7 @@ class TransferJobState(BaseModel):
     processed_count: int = 0
     added_count: int = 0
     failed_count: int = 0
-    status: str = "idle"  # idle, running, completed, cancelled, failed
+    status: str = "idle"
     created_at: str = ""
     duration_seconds: float = 0.0
 
@@ -49,7 +49,6 @@ class TransferManager:
     def save_to_history(self, record: Dict[str, Any]):
         history = self.get_history()
         history.insert(0, record)
-        # Keep latest 50 history entries
         history = history[:50]
         with open(HISTORY_FILE, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
@@ -62,24 +61,21 @@ class TransferManager:
     ) -> str:
         job_id = str(uuid.uuid4())[:8]
 
-        # 1. Fetch playlist metadata & tracks from Spotify
         source_playlist = self.spotify.get_playlist(source_playlist_url)
         tracks = self.spotify.get_playlist_tracks(source_playlist_url)
 
         if not tracks:
-            raise ValueError("Seçilen çalma listesinde aktarılacak şarkı bulunamadı.")
+            raise ValueError("No tracks found in the selected playlist.")
 
         target_name = custom_target_name.strip() if custom_target_name else source_playlist.name
         
-        # 2. Create playlist on YouTube Music
         target_playlist_id = self.youtube.create_playlist(
             title=target_name,
-            description=f"Aktarıldı: {source_playlist.name} (MusiConnect)",
+            description=f"Transferred: {source_playlist.name} (MusiConnect)",
             is_private=is_private
         )
         target_playlist_url = f"https://music.youtube.com/playlist?list={target_playlist_id}"
 
-        # Initialize job state
         event_queue = asyncio.Queue()
         job_data = {
             "job_id": job_id,
@@ -98,7 +94,6 @@ class TransferManager:
         }
         self.active_jobs[job_id] = job_data
 
-        # Launch background worker
         asyncio.create_task(self._run_transfer_worker(job_id))
         return job_id
 
@@ -130,7 +125,6 @@ class TransferManager:
                     item.status = "cancelled"
                     break
 
-                # 1. Search track
                 search_res = self.youtube.search_track(item.source_track, tolerance_seconds=tolerance)
                 job["processed"] += 1
 
@@ -141,10 +135,9 @@ class TransferManager:
                     batch_items.append(item)
                 else:
                     item.status = "not_found"
-                    item.error = "Uygun eşleşme bulunamadı"
+                    item.error = "No suitable match found"
                     job["failed"] += 1
 
-                # Send item event
                 await queue.put({
                     "type": "item_updated",
                     "item": item.dict(),
@@ -154,7 +147,6 @@ class TransferManager:
                     "failed": job["failed"]
                 })
 
-                # If batch size reached, flush to YouTube
                 if len(batch_video_ids) >= batch_size:
                     try:
                         self.youtube.add_tracks_to_playlist(target_playlist_id, batch_video_ids)
@@ -175,10 +167,8 @@ class TransferManager:
                     batch_video_ids = []
                     batch_items = []
 
-                # Small sleep to be courteous to YouTube servers
                 await asyncio.sleep(delay)
 
-            # Flush any remaining items in the final batch
             if batch_video_ids and not job.get("cancel_requested"):
                 try:
                     self.youtube.add_tracks_to_playlist(target_playlist_id, batch_video_ids)
